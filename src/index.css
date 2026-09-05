@@ -1,0 +1,157 @@
+/* Josh Comeau CSS Reset:
+
+/*
+  1. Use a more-intuitive box-sizing model.
+*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+/*
+2. Remove default margin
+*/
+* {
+  margin: 0;
+}
+/*
+Typographic tweaks!
+3. Add accessible line-height
+4. Improve text rendering
+*/
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-family: "Geist Mono", serif;
+}
+/*
+5. Improve media defaults
+*/
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+/*
+6. Remove built-in form typography styles
+*/
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+/*
+7. Avoid text overflows
+*/
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+:root {
+  color: #20201f;
+  background: #f7f7f5;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f7f7f5;
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.65rem 0.75rem;
+  color: #20201f;
+  background: #fff;
+  border: 1px solid #cececa;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 4%);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+input:hover,
+select:hover {
+  border-color: #aaa9a4;
+}
+
+input:focus,
+select:focus {
+  border-color: #242422;
+  box-shadow: 0 0 0 3px rgb(36 36 34 / 12%);
+}
+
+.button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid #cececa;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+  color: #20201f;
+  cursor: pointer;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  transition: background 150ms ease, border-color 150ms ease,
+    box-shadow 150ms ease, transform 150ms ease;
+}
+
+.button:hover {
+  border-color: #aaa9a4;
+  background: #f6f6f4;
+}
+
+.button:active {
+  box-shadow: none;
+  transform: translateY(1px);
+}
+
+.button--primary {
+  border-color: #242422;
+  background: #242422;
+  color: #fff;
+}
+
+.button--primary:hover {
+  border-color: #383835;
+  background: #383835;
+}
+
+.button--icon {
+  width: 30px;
+  min-height: 30px;
+  flex: 0 0 30px;
+  padding: 0;
+  border-radius: 7px;
+  font-size: 1.1rem;
+}
+
+.button:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgb(36 36 34 / 22%);
+  outline-offset: 2px;
+}

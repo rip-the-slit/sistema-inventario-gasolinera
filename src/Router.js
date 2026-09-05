@@ -28,14 +28,16 @@ export class Router {
   handleRoute() {
     const path = window.location.pathname || "/";
     const route = this.routes[path] || this.routes["/404"];
+    const userRole = this.authService.getCurrentUser()?.role ?? null;
 
     if (route) {
-      if (route.allowRoute(this.authService.getCurrentUser().role)) {
-        route.handler()
+      if (route.allowRoute(userRole)) {
+        route.handler();
       } else {
-        this.navigate("/")
+        const fallbackPath = userRole === null ? "/" : "/dashboard";
+        if (path !== fallbackPath) this.navigate(fallbackPath);
       }
-      this.currentRoute = path
+      this.currentRoute = path;
     } else {
       console.error("Ruta no encontrada:", path);
     }
