@@ -13,9 +13,10 @@ export class Router {
 
     window.addEventListener("popstate", () => this.handleRoute());
     document.addEventListener("click", (e) => {
-      if (e.target.matches("a[data-link]")) {
+      const closestLink = e.target.closest("a[data-link]")
+      if (closestLink) {
         e.preventDefault();
-        this.navigate(e.target.getAttribute("href"));
+        this.navigate(closestLink.getAttribute("href"));
       }
     });
   }
@@ -26,13 +27,15 @@ export class Router {
   }
 
   handleRoute() {
-    const path = window.location.pathname || "/";
+    const url = new URL(window.location.href);
+    const path = url.pathname || "/";
+    const params = Object.fromEntries(url.searchParams.entries());
     const route = this.routes[path] || this.routes["/404"];
     const userRole = this.authService.getCurrentUser()?.role ?? null;
 
     if (route) {
       if (route.allowRoute(userRole)) {
-        route.handler();
+        route.handler(params);
       } else {
         const fallbackPath = userRole === null ? "/" : "/dashboard";
         if (path !== fallbackPath) this.navigate(fallbackPath);

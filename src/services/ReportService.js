@@ -7,14 +7,12 @@ import {
   TextRun,
 } from "docx";
 
-const acceptedStatuses = new Set(["accepted", "aceptado", "aprobado"]);
-
 export default class ReportService {
   #permissions = {
-    generateReport: [null, "employee", "admin"],
+    generateTicketReport: [null, "employee", "admin"],
   };
 
-  async generateReport(ticket) {
+  async generateTicketReport(ticket) {
     this.#validateTicket(ticket);
 
     const accepted = ticket.status.success;

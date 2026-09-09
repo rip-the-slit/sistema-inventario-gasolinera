@@ -1,0 +1,22 @@
+.status-box {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.65rem 0.65rem 0.8rem;
+  color: #7b2921;
+  background: #fff4f2;
+  border: 1px solid #ecc3bd;
+  border-radius: 8px;
+  font-size: 0.825rem;
+}
+
+.status-box.open {
+  display: flex;
+}
+
+.status-box[data-tone="success"] {
+  color: #235f35;
+  background: #f0faf3;
+  border-color: #b9dec3;
+}

@@ -1,5 +1,5 @@
 export class Ticket {
-  constructor(emissionDate, id, vehicle, status, verificationCode, ) {
+  constructor(emissionDate, id, vehicle, status, verificationCode) {
     this.emissionDate = emissionDate;
     this.id = id;
     this.vehicle = vehicle;
@@ -27,8 +27,8 @@ export class Motorbike extends Vehicle {
     super("Motorbike", brand, model, plateNumber, colour);
   }
 
-  assignFuel(quantity, inventoryService) {
-    return inventoryService.assignFuel(quantity, "motorbike_regular");
+  assignFuel(inventoryService) {
+    return inventoryService.assignFuel("motorbike");
   }
 }
 
@@ -37,8 +37,8 @@ export class Truck extends Vehicle {
     super("Truck", brand, model, plateNumber, colour);
   }
 
-  assignFuel(quantity, inventoryService) {
-    return inventoryService.assignFuel(quantity, "truck_diesel");
+  assignFuel(inventoryService) {
+    return inventoryService.assignFuel("truck");
   }
 }
 
@@ -47,8 +47,8 @@ export class Car extends Vehicle {
     super("Car", brand, model, plateNumber, colour);
   }
 
-  assignFuel(quantity, inventoryService) {
-    return inventoryService.assignFuel(quantity, "car_regular");
+  assignFuel(inventoryService) {
+    return inventoryService.assignFuel("car");
   }
 }
 
@@ -60,8 +60,8 @@ const vehicleClasses = {
 
 export default class TicketService {
   #permissions = {
-    generateTicket: [null],
-    getTickets: ["employee", "admin"],
+    generateTicket: [null, "employee", "admin"],
+    getTickets: [null, "employee", "admin"],
     getSupplySchedule: [null, "employee", "admin"],
     setSupplySchedule: ["employee", "admin"],
   };
@@ -70,7 +70,7 @@ export default class TicketService {
 
   #ids = new Set(Array.from({ length: 20 }, (_, i) => i + 1));
   #verificationCodes = new Set(
-    Array.from({ length: 999 }, (_, i) => i.toString().padStart(2, "0"))
+    Array.from({ length: 900 }, (_, i) => String(i + 100))
   );
 
   constructor(
@@ -107,7 +107,6 @@ export default class TicketService {
     plateNumber,
     colour,
     status,
-    quantity,
     verificationCode,
   } = {}) {
     const resolvedType = vehicleType ?? type ?? vehicleData.type;
@@ -117,7 +116,6 @@ export default class TicketService {
       throw new Error(`El tipo de vehículo "${resolvedType}" no es válido.`);
     }
 
-    id = null;
     const emissionDate = new Date().toDateString();
     const vehicle = new VehicleClass(
       brand ?? vehicleData.brand,
@@ -128,10 +126,12 @@ export default class TicketService {
 
     try {
       verificationCode = this.getRandomVerificationCode();
-      if (status || status.success) {
-        vehicle.assignFuel(quantity, this.inventoryService);
-        id = this.getRandomId(emissionDate);
-        status = { succes: true, type, quantity };
+      id = this.getRandomId(emissionDate);
+      const accepted = status === undefined || status?.success !== false;
+
+      if (accepted) {
+        const quantity = vehicle.assignFuel(this.inventoryService);
+        status = { success: true, type: vehicle.type, quantity };
       }
     } catch (error) {
       status = { success: false, message: error.message };
@@ -142,8 +142,7 @@ export default class TicketService {
       id,
       vehicle,
       status,
-      verificationCode,
-      rowId
+      verificationCode
     );
 
     this.#tickets.push(ticket);
@@ -181,9 +180,9 @@ export default class TicketService {
   getRandomId(dateString) {
     const dateTickets = this.getTickets({ emissionDate: dateString });
     const takenIds = new Set(dateTickets.map((ticket) => ticket.id));
-    const idsLeft = Array.from(this.#ids.difference(takenIds).values());
+    const idsLeft = [...this.#ids].filter((id) => !takenIds.has(id));
 
-    if (idsLeft.size === 0) {
+    if (idsLeft.length === 0) {
       throw new Error("No hay más turnos disponibles.");
     }
 
@@ -197,11 +196,11 @@ export default class TicketService {
     const takenCodes = new Set(
       tickets.map((ticket) => ticket.verificationCode)
     );
-    const codesLeft = Array.from(
-      this.#verificationCodes.difference(takenCodes).values()
+    const codesLeft = [...this.#verificationCodes].filter(
+      (code) => !takenCodes.has(code)
     );
 
-    if (codesLeft.size === 0) {
+    if (codesLeft.length === 0) {
       throw new Error("No hay más códigos disponibles.");
     }
 

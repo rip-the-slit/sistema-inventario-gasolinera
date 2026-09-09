@@ -1,4 +1,5 @@
 import "../styles/LoginPage.css";
+import { bindStatusBox, renderStatusBox } from "../components/StatusBox";
 
 export default function renderLoginPage(authService, container, onLogin) {
   container.innerHTML = /*html*/ `
@@ -36,10 +37,7 @@ export default function renderLoginPage(authService, container, onLogin) {
             <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="●●●●●●●●" maxlength="20" required>
           </div>
 
-          <div class="login-status" data-login-status>
-            <span data-login-status-message></span>
-            <button class="button button--icon" type="button" data-close-login-status aria-label="Cerrar mensaje">×</button>
-          </div>
+          ${renderStatusBox()}
 
           <button class="button button--primary login-submit" type="submit">Iniciar sesión</button>
         </form>
@@ -48,9 +46,7 @@ export default function renderLoginPage(authService, container, onLogin) {
   `;
 
   const form = container.querySelector("[data-login-form]");
-  const status = container.querySelector("[data-login-status]");
-  const statusMessage = container.querySelector("[data-login-status-message]");
-  const closeStatus = container.querySelector("[data-close-login-status]");
+  const statusBox = bindStatusBox(container);
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -64,12 +60,8 @@ export default function renderLoginPage(authService, container, onLogin) {
       const user = authService.login(credentials);
       onLogin(user);
     } catch (error) {
-      statusMessage.textContent = error.message;
-      status.classList.add("open");
+      statusBox.show(error.message);
     }
   });
 
-  closeStatus.addEventListener("click", () => {
-    status.classList.remove("open");
-  });
 }
