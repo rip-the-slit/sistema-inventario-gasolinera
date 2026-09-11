@@ -13,6 +13,11 @@ export default class AuthService {
     register: ["admin"],
     login: [null],
     getCurrentUser: [null, "employee", "admin"],
+    getUsers: ["admin"],
+    editUser: ["admin"],
+    deleteUser: ["admin"],
+    generateOTP: ["admin"],
+    validateOTP: ["admin"],
   };
 
   #current = null;
@@ -22,14 +27,20 @@ export default class AuthService {
     new User("E-1", "employee@example.com", "employee123", "employee"),
   ];
 
-  register({ id, email, password, role }) {
+  #otps = [];
+
+  register({ id, email, password, role, otp }) {
     if (!this.#isValidUserData({ id, email, password, role })) {
-      throw new TypeError("ID, correo, contraseña, y rol válidos son requeridos.");
+      throw new TypeError(
+        "ID, correo, contraseña, y rol válidos son requeridos."
+      );
     }
 
     if (this.#users.some((user) => user.id === id || user.email === email)) {
       throw new Error("Un usuario con el mismo ID o correo ya existe.");
     }
+
+    this.validateOTP(otp, email);
 
     const user = new User(id, email, password, role);
     this.#users.push(user);
@@ -54,14 +65,89 @@ export default class AuthService {
     return this.#toPublicUser(user);
   }
 
+  logout() {
+    this.#current = null;
+  }
+
   getCurrentUser() {
     return this.#current ? this.#toPublicUser(this.#current) : null;
   }
 
+  getUsers() {
+    return this.#users.map((u) => this.#toPublicUser(u));
+  }
+
+  editUser({ id, email, password, role }) {
+    if (!this.#isNonEmptyString(id)) {
+      throw new TypeError("La ID es requerida.");
+    }
+
+    const user = this.#users.find((u) => u.id === id);
+
+    if (!user) {
+      throw new Error("No existe un usuario con el ID especificado.");
+    }
+
+    this.#isNonEmptyString(email) && (user.email = email);
+    this.#isNonEmptyString(password) && (user.password = password);
+    this.#isNonEmptyString(role) &&
+      ["employee", "admin"].includes(role) &&
+      (user.role = role);
+  }
+
+  deleteUser(id) {
+    if (!this.#isNonEmptyString(id)) {
+      throw new TypeError("La ID es requerida.");
+    }
+
+    if (this.#current?.id === id) {
+      throw new Error("No puedes eliminar tu propio usuario mientras tienes la sesión iniciada.");
+    }
+
+    const index = this.#users.findIndex((u) => u.id === id);
+
+    if (index === -1) {
+      throw new Error("No existe un usuario con el ID especificado.");
+    }
+
+    this.#users.splice(index, 1);
+  }
+
   getPermissions() {
     return Object.fromEntries(
-      Object.entries(this.#permissions).map(([action, roles]) => [action, [...roles]])
+      Object.entries(this.#permissions).map(([action, roles]) => [
+        action,
+        [...roles],
+      ])
     );
+  }
+
+  generateOTP(email) {
+    if (!this.#isNonEmptyString(email)) {
+      throw new Error("Ingresa un correo válido.");
+    }
+    const otp = Math.floor(Math.random() * 900000) + 100000;
+    this.#otps.push({ email, otp: String(otp), createdAt: Date.now() });
+    return otp;
+  }
+
+  validateOTP(otp, email) {
+    if (!this.#isNonEmptyString(otp)) {
+      throw new Error("Ingresa un código OTP válido.");
+    }
+
+    const otpEntry = this.#otps.find(
+      (entry) =>
+        entry.otp === String(otp) &&
+        entry.email === email &&
+        Date.now() - entry.createdAt < 600000
+    );
+
+    if (!otpEntry) {
+      throw new Error("El código OTP no es válido o ha expirado.");
+    }
+
+    return true;
   }
 
   #isNonEmptyString(value) {
