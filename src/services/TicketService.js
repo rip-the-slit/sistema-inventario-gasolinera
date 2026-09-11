@@ -156,11 +156,16 @@ export default class TicketService {
 
     return this.#tickets.filter((ticket) =>
       Object.entries(filters).every(([attribute, expected]) => {
-        if (attribute === "vehicle" && this.#isObject(expected)) {
+        if (
+          (attribute === "vehicle" || attribute === "status") &&
+          this.#isObject(expected)
+        ) {
+          const source = ticket[attribute];
           return Object.entries(expected).every(
-            ([vehicleAttribute, value]) =>
-              Object.hasOwn(ticket.vehicle, vehicleAttribute) &&
-              this.#matches(ticket.vehicle[vehicleAttribute], value)
+            ([nestedAttribute, value]) =>
+              this.#isObject(source) &&
+              Object.hasOwn(source, nestedAttribute) &&
+              this.#matches(source[nestedAttribute], value)
           );
         }
 

@@ -29,7 +29,7 @@ export default function renderLoginPage(authService, container, onLogin) {
 
           <div class="form-field">
             <label for="login-email">Correo electrónico</label>
-            <input id="login-email" name="email" type="email" autocomplete="email" placeholder="tu@correo.electronico" maxlength="20" required>
+            <input id="login-email" name="email" type="email" autocomplete="email" placeholder="tu@correo.electronico" maxlength="40" required>
           </div>
 
           <div class="form-field">

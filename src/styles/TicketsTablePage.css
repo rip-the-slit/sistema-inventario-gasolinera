@@ -1,0 +1,110 @@
+.tickets-table-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.tickets-card {
+  width: min(100%, 1500px);
+  margin: 0 auto;
+  padding: 2rem;
+  background: #fff;
+  border: 1px solid #dededa;
+  border-radius: 12px;
+  box-shadow: 0 12px 35px rgb(0 0 0 / 7%);
+}
+
+.tickets-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tickets-header h1 {
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.tickets-header p:last-child { color: #676762; }
+
+.tickets-eyebrow {
+  margin-bottom: 0.35rem;
+  color: #74736e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ticket-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #fafaf8;
+  border: 1px solid #e2e2de;
+  border-radius: 10px;
+}
+
+.ticket-filter-actions {
+  display: flex;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.tickets-table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+  border: 1px solid #dededa;
+  border-radius: 10px;
+}
+
+.tickets-table {
+  width: 100%;
+  min-width: 1450px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tickets-table th,
+.tickets-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e8e8e4;
+  font-size: 0.8rem;
+  vertical-align: top;
+}
+
+.tickets-table thead th {
+  position: sticky;
+  top: 0;
+  color: #555550;
+  background: #f7f7f5;
+  white-space: nowrap;
+}
+
+.tickets-table tfoot th,
+.tickets-table tfoot td {
+  background: #f7f7f5;
+  border-bottom: 0;
+  font-weight: 750;
+}
+
+.ticket-state {
+  display: inline-flex;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.ticket-state--accepted { color: #235f35; background: #e9f7ed; }
+.ticket-state--cancelled { color: #7b2921; background: #fff0ed; }
+.tickets-empty { padding: 2rem !important; color: #676762; text-align: center; }
+
+@media (max-width: 760px) {
+  .tickets-card { padding: 1.25rem; }
+  .tickets-header { align-items: stretch; flex-direction: column; }
+  .ticket-filters { grid-template-columns: 1fr; }
+}

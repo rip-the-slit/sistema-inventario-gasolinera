@@ -41,6 +41,7 @@ export default function renderAssignPage(ticketService, isSupplied, user, contai
           <div class="form-field"><label for="vehicle-plate">Placa</label><input id="vehicle-plate" name="plateNumber" type="text" required></div>
           <div class="form-field"><label for="vehicle-colour">Color</label><input id="vehicle-colour" name="colour" type="text" required></div>
           ${renderStatusBox()}
+          <a class="button" href="/dashboard" data-link>Volver al panel</a>
           <button class="button button--primary" type="submit">Generar ticket</button>
         </form>
       </section>

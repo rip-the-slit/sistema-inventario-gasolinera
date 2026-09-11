@@ -47,6 +47,7 @@ export default function renderSupplyPage(inventoryService, container) {
             <div class="supply-distribution-grid">${distributionFields}</div>
           </section>
           ${renderStatusBox()}
+          <a class="button" href="/dashboard" data-link>Volver al panel</a>
           <button class="button button--primary" type="submit">Guardar configuración</button>
         </form>
       </section>

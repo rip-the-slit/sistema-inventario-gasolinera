@@ -7,7 +7,7 @@ const dashboardActions = [
   { href: "/usuarios", title: "Usuarios", description: "Manejo de usuarios", roles: ["admin"] },
 ];
 
-export default function renderDashboardPage(user, container) {
+export default function renderDashboardPage(user, container, onLogout) {
   const userLevel = user?.role ?? null;
   const actions = dashboardActions
     .filter(({ roles }) => roles.includes(userLevel))
@@ -30,7 +30,7 @@ export default function renderDashboardPage(user, container) {
         <nav class="dashboard-actions" aria-label="Opciones del sistema">${actions}</nav>
         <div class="dashboard-session">
           <span data-user-details></span>
-          ${user ? `<button class="button" type="button">Cerrar sesión</button>` : `<a class="button button--primary" href="/" data-link>Iniciar sesión</a>`}
+          ${user ? `<button class="button" type="button" data-logout>Cerrar sesión</button>` : `<a class="button button--primary" href="/" data-link>Iniciar sesión</a>`}
         </div>
       </section>
     </main>
@@ -39,4 +39,9 @@ export default function renderDashboardPage(user, container) {
   container.querySelector("[data-user-details]").textContent = user
     ? `Sesión iniciada como ${user.email} (${user.role}).`
     : "Has continuado como cliente.";
+
+  container.querySelector("[data-logout]")?.addEventListener("click", () => {
+    globalThis.location.href = "/";
+    onLogout()
+  })
 }
