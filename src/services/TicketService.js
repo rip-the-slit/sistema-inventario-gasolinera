@@ -58,14 +58,7 @@ const vehicleClasses = {
   car: Car,
 };
 
-export default class TicketService {
-  #permissions = {
-    generateTicket: [null, "employee", "admin"],
-    getTickets: [null, "employee", "admin"],
-    getSupplySchedule: [null, "employee", "admin"],
-    setSupplySchedule: ["employee", "admin"],
-  };
-
+export default class TicketService extends Service {
   #tickets = [];
 
   #ids = new Set(Array.from({ length: 20 }, (_, i) => i + 1));
@@ -73,17 +66,13 @@ export default class TicketService {
     Array.from({ length: 900 }, (_, i) => String(i + 100))
   );
 
-  constructor(
-    initTickets = [],
-    inventoryService,
-    supplySchedule = { start: null, end: null }
-  ) {
-    if (
-      !Array.isArray(initTickets) ||
-      !initTickets.every((ticket) => ticket instanceof Ticket)
-    ) {
-      throw new Error("Tickets de inicialización inválidos.");
-    }
+  constructor(inventoryService) {
+    super({
+      generateTicket: [null, "employee", "admin"],
+      getTickets: [null, "employee", "admin"],
+      getSupplySchedule: [null, "employee", "admin"],
+      setSupplySchedule: ["employee", "admin"],
+    });
 
     if (
       !inventoryService ||
@@ -92,9 +81,24 @@ export default class TicketService {
       throw new Error("El servicio de inventario es inválido.");
     }
 
-    this.#tickets = [...initTickets];
     this.inventoryService = inventoryService;
-    this.supplySchedule = this.#validateSupplySchedule(supplySchedule);
+    const savedTickets = this.readStorage("tickets", []);
+    this.#tickets = (Array.isArray(savedTickets) ? savedTickets : [])
+      .map((ticket) => this.#hydrateTicket(ticket))
+      .filter(Boolean);
+
+    const savedSchedule = this.readStorage("supplySchedule", {
+      start: null,
+      end: null,
+    });
+    try {
+      this.supplySchedule = this.#validateSupplySchedule(savedSchedule);
+    } catch {
+      this.supplySchedule = { start: null, end: null };
+    }
+
+    this.#saveTickets();
+    this.#saveSupplySchedule();
   }
 
   generateTicket({
@@ -146,6 +150,7 @@ export default class TicketService {
     );
 
     this.#tickets.push(ticket);
+    this.#saveTickets();
     return ticket;
   }
 
@@ -220,16 +225,8 @@ export default class TicketService {
 
   setSupplySchedule(supplySchedule) {
     this.supplySchedule = this.#validateSupplySchedule(supplySchedule);
+    this.#saveSupplySchedule();
     return this.getSupplySchedule();
-  }
-
-  getPermissions() {
-    return Object.fromEntries(
-      Object.entries(this.#permissions).map(([action, roles]) => [
-        action,
-        [...roles],
-      ])
-    );
   }
 
   #validateSupplySchedule(supplySchedule) {
@@ -258,4 +255,42 @@ export default class TicketService {
 
     return actual === expected;
   }
+
+  #hydrateTicket(ticket) {
+    if (!this.#isObject(ticket) || !this.#isObject(ticket.vehicle)) {
+      return null;
+    }
+
+    const VehicleClass = vehicleClasses[String(ticket.vehicle.type).toLowerCase()];
+    if (!VehicleClass) return null;
+
+    const id = Number(ticket.id);
+    if (!Number.isInteger(id) || id < 1 || id > 20) return null;
+
+    const verificationCode = String(ticket.verificationCode ?? "");
+    if (!/^\d{3}$/.test(verificationCode)) return null;
+
+    const vehicle = new VehicleClass(
+      ticket.vehicle.brand,
+      ticket.vehicle.model,
+      ticket.vehicle.plateNumber,
+      ticket.vehicle.colour
+    );
+    return new Ticket(
+      ticket.emissionDate,
+      id,
+      vehicle,
+      this.#isObject(ticket.status) ? ticket.status : { success: false },
+      verificationCode
+    );
+  }
+
+  #saveTickets() {
+    this.writeStorage("tickets", this.#tickets);
+  }
+
+  #saveSupplySchedule() {
+    this.writeStorage("supplySchedule", this.supplySchedule);
+  }
 }
+import Service from "./Service.js";

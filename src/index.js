@@ -18,7 +18,7 @@ const rootContainer = document.getElementById("app");
 
 const authService = new AuthService();
 const inventoryService = new InventoryService();
-const ticketService = new TicketService([], inventoryService);
+const ticketService = new TicketService(inventoryService);
 const reportService = new ReportService();
 const emailService = new EmailService();
 
@@ -41,7 +41,10 @@ const router = new Router(
       checkRoles([null, "employee", "admin"])
     ),
     "/dashboard": new RouteConfig(
-      () => renderDashboardPage(authService.getCurrentUser(), rootContainer, () => authService.logout()),
+      () =>
+        renderDashboardPage(authService.getCurrentUser(), rootContainer, () =>
+          authService.logout()
+        ),
       checkRoles([null, "employee", "admin"])
     ),
     "/asignar": new RouteConfig(

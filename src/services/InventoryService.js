@@ -1,12 +1,19 @@
+import Service from "./Service.js";
+
 const MINIMUM_GAS_LEVELS_LT = 1900;
 
-export class FuelTank {
-  constructor(quantity = 0) {
-    if (!Number.isFinite(quantity) || quantity < 0) {
+export class FuelTank extends Service {
+  constructor(quantity) {
+    super();
+    const savedQuantity = this.readStorage("fuelQuantity", 0);
+    const initialQuantity = quantity === undefined ? savedQuantity : Number(quantity);
+
+    if (!Number.isFinite(initialQuantity) || initialQuantity < 0) {
       throw new Error("La cantidad de combustible es inválida.");
     }
 
-    this.quantity = quantity;
+    this.quantity = initialQuantity;
+    this.#save();
   }
 
   getQuantity() {
@@ -16,6 +23,7 @@ export class FuelTank {
   supply(quantity) {
     this.#validateQuantity(quantity);
     this.quantity += quantity;
+    this.#save();
     return this.quantity;
   }
 
@@ -27,6 +35,7 @@ export class FuelTank {
     }
 
     this.quantity -= quantity;
+    this.#save();
     return quantity;
   }
 
@@ -35,18 +44,14 @@ export class FuelTank {
       throw new Error("La cantidad de combustible es inválida.");
     }
   }
+
+  #save() {
+    this.writeStorage("fuelQuantity", this.quantity);
+  }
 }
 
-export default class InventoryService {
-  #permissions = {
-    assignFuel: [null, "employee", "admin"],
-    getAssignedLtPerVehicle: [null, "employee", "admin"],
-    setAssignedLtPerVehicle: [null, "employee", "admin"],
-    isSupplied: [null, "employee", "admin"],
-    getTank: ["employee", "admin"],
-  };
-
-  #fuelTank = new FuelTank(0);
+export default class InventoryService extends Service {
+  #fuelTank;
 
   #assignedLtPerVehicleType = {
     motorbike: 5,
@@ -54,12 +59,28 @@ export default class InventoryService {
     car: 25,
   };
 
-  constructor(initTank = new FuelTank(0)) {
-    if (!(initTank instanceof FuelTank)) {
-      throw new Error("El tanque de combustible es inválido.");
+  constructor() {
+    super({
+      assignFuel: [null, "employee", "admin"],
+      getAssignedLtPerVehicle: [null, "employee", "admin"],
+      setAssignedLtPerVehicle: [null, "employee", "admin"],
+      isSupplied: [null, "employee", "admin"],
+      getTank: ["employee", "admin"],
+    });
+
+    this.#fuelTank = new FuelTank();
+
+    const savedAssignments = this.readStorage("assignedLtPerVehicle", null);
+    if (this.#isValidAssignments(savedAssignments)) {
+      this.#assignedLtPerVehicleType = Object.fromEntries(
+        Object.entries(savedAssignments).map(([type, value]) => [
+          type,
+          Number(value),
+        ])
+      );
     }
 
-    this.#fuelTank = initTank;
+    this.#saveAssignments();
   }
 
   assignFuel(type) {
@@ -104,19 +125,31 @@ export default class InventoryService {
     }
 
     this.#assignedLtPerVehicleType = normalized;
+    this.#saveAssignments();
     return this.getAssignedLtPerVehicle();
-  }
-
-  getPermissions() {
-    return Object.fromEntries(
-      Object.entries(this.#permissions).map(([action, roles]) => [
-        action,
-        [...roles],
-      ])
-    );
   }
 
   isSupplied() {
     return this.#fuelTank.getQuantity() > MINIMUM_GAS_LEVELS_LT;
+  }
+
+  #isValidAssignments(assignments) {
+    if (!assignments || typeof assignments !== "object") return false;
+
+    const expectedTypes = Object.keys(this.#assignedLtPerVehicleType);
+    const receivedTypes = Object.keys(assignments);
+    return (
+      receivedTypes.length === expectedTypes.length &&
+      expectedTypes.every(
+        (type) =>
+          receivedTypes.includes(type) &&
+          Number.isFinite(Number(assignments[type])) &&
+          Number(assignments[type]) > 0
+      )
+    );
+  }
+
+  #saveAssignments() {
+    this.writeStorage("assignedLtPerVehicle", this.#assignedLtPerVehicleType);
   }
 }

@@ -1,4 +1,4 @@
-class User {
+export class User {
   constructor(id, email, password, role, fullName = null) {
     this.id = id;
     this.email = email;
@@ -8,18 +8,7 @@ class User {
   }
 }
 
-export default class AuthService {
-  #permissions = {
-    register: ["admin"],
-    login: [null],
-    getCurrentUser: [null, "employee", "admin"],
-    getUsers: ["admin"],
-    editUser: ["admin"],
-    deleteUser: ["admin"],
-    generateOTP: ["admin"],
-    validateOTP: ["admin"],
-  };
-
+export default class AuthService extends Service {
   #current = null;
 
   #users = [
@@ -28,6 +17,34 @@ export default class AuthService {
   ];
 
   #otps = [];
+
+  constructor() {
+    super({
+      register: ["admin"],
+      login: [null],
+      getCurrentUser: [null, "employee", "admin"],
+      getUsers: ["admin"],
+      editUser: ["admin"],
+      deleteUser: ["admin"],
+      generateOTP: ["admin"],
+      validateOTP: ["admin"],
+    });
+
+    const storedUsers = this.readStorage("users", null);
+    if (Array.isArray(storedUsers) && storedUsers.length > 0) {
+      this.#users = storedUsers.map(
+        ({ id, email, password, role, fullName }) =>
+          new User(id, email, password, role, fullName)
+      );
+    }
+
+    const storedCurrentUser = this.readStorage("currentUser", null);
+    if (storedCurrentUser?.id) {
+      this.#current = this.#users.find(
+        (user) => user.id === storedCurrentUser.id
+      ) ?? null;
+    }
+  }
 
   register({ id, email, password, role, otp }) {
     if (!this.#isValidUserData({ id, email, password, role })) {
@@ -44,6 +61,7 @@ export default class AuthService {
 
     const user = new User(id, email, password, role);
     this.#users.push(user);
+    this.#saveUsers();
     return this.#toPublicUser(user);
   }
 
@@ -62,11 +80,13 @@ export default class AuthService {
     if (!user) throw new Error("Las credenciales no son válidas.");
 
     this.#current = user;
+    this.#saveCurrentUser();
     return this.#toPublicUser(user);
   }
 
   logout() {
     this.#current = null;
+    this.removeStorage("currentUser");
   }
 
   getCurrentUser() {
@@ -93,6 +113,9 @@ export default class AuthService {
     this.#isNonEmptyString(role) &&
       ["employee", "admin"].includes(role) &&
       (user.role = role);
+
+    this.#saveUsers();
+    if (this.#current?.id === user.id) this.#saveCurrentUser();
   }
 
   deleteUser(id) {
@@ -111,15 +134,7 @@ export default class AuthService {
     }
 
     this.#users.splice(index, 1);
-  }
-
-  getPermissions() {
-    return Object.fromEntries(
-      Object.entries(this.#permissions).map(([action, roles]) => [
-        action,
-        [...roles],
-      ])
-    );
+    this.#saveUsers();
   }
 
   generateOTP(email) {
@@ -169,4 +184,13 @@ export default class AuthService {
   #toPublicUser({ id, email, role }) {
     return { id, email, role };
   }
+
+  #saveUsers() {
+    this.writeStorage("users", this.#users);
+  }
+
+  #saveCurrentUser() {
+    this.writeStorage("currentUser", this.#toPublicUser(this.#current));
+  }
 }
+import Service from "./Service.js";

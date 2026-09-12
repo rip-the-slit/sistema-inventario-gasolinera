@@ -6,11 +6,12 @@ import {
   Paragraph,
   TextRun,
 } from "docx";
+import Service from "./Service.js";
 
-export default class ReportService {
-  #permissions = {
-    generateTicketReport: [null, "employee", "admin"],
-  };
+export default class ReportService extends Service {
+  constructor() {
+    super({ generateTicketReport: [null, "employee", "admin"] });
+  }
 
   async generateTicketReport(ticket) {
     this.#validateTicket(ticket);
@@ -119,15 +120,6 @@ export default class ReportService {
     });
 
     return Packer.toBlob(document);
-  }
-
-  getPermissions() {
-    return Object.fromEntries(
-      Object.entries(this.#permissions).map(([action, roles]) => [
-        action,
-        [...roles],
-      ])
-    );
   }
 
   #heading(text) {

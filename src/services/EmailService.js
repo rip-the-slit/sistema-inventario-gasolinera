@@ -1,11 +1,10 @@
-export default class EmailService {
-  #permissions = {
-    sendOTP: ["admin"],
-  };
+import Service from "./Service.js";
 
+export default class EmailService extends Service {
   #serviceId = null;
 
   constructor() {
+    super({ sendOTP: ["admin"] });
     emailjs.init({publicKey: process.env.EMAILJS_SECRET});
     this.#serviceId = process.env.EMAILJS_SERVICEID || "default_service";
   }
@@ -26,12 +25,4 @@ export default class EmailService {
     }
   }
 
-  getPermissions() {
-    return Object.fromEntries(
-      Object.entries(this.#permissions).map(([action, roles]) => [
-        action,
-        [...roles],
-      ])
-    );
-  }
 }
