@@ -8,11 +8,14 @@ export default function renderLoginPage(authService, container, onLogin) {
 
         <header class="login-header">
           <h1 id="login-title">Iniciar sesión</h1>
-          <p>Ingresa tus credenciales para acceder al panel.</p>
         </header>
+        <p>Ingresa tus credenciales para acceder al panel.</p>
 
         <div class="login-navigation" aria-label="Navegación de acceso">
-          <a class="button" href="/dashboard" data-link>Continuar como cliente</a>
+          <a class="button" href="/dashboard" data-link>
+            Continuar como cliente
+            <i class="fa-solid fa-right-to-bracket fa-lg"></i>
+          </a>
         </div>
 
         <form data-login-form>
@@ -25,16 +28,19 @@ export default function renderLoginPage(authService, container, onLogin) {
               </select>
               <input id="login-id-number" name="idNumber" type="number" inputmode="numeric" autocomplete="username" aria-labelledby="login-id-label" min="1" max="100000000" step="1" placeholder="12345678" required>
             </div>
+            <i class="fa-solid fa-person fa-lg" style="top: 2.8rem; right: 0.35rem;"></i>
           </div>
 
           <div class="form-field">
             <label for="login-email">Correo electrónico</label>
             <input id="login-email" name="email" type="email" autocomplete="email" placeholder="tu@correo.electronico" maxlength="40" required>
+            <i class="fa-solid fa-envelope"></i>
           </div>
 
           <div class="form-field">
             <label for="login-password">Contraseña</label>
-            <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="●●●●●●●●" maxlength="20" required>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="●●●●●●●●" maxlength="40" required>
+            <i class="fa-solid fa-lock"></i>
           </div>
 
           ${renderStatusBox()}
@@ -63,5 +69,4 @@ export default function renderLoginPage(authService, container, onLogin) {
       statusBox.show(error.message);
     }
   });
-
 }

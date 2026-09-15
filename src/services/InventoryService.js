@@ -22,7 +22,7 @@ export class FuelTank extends Service {
 
   supply(quantity) {
     this.#validateQuantity(quantity);
-    this.quantity += quantity;
+    this.quantity = quantity;
     this.#save();
     return this.quantity;
   }

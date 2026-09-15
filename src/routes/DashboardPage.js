@@ -1,10 +1,10 @@
 import "../styles/DashboardPage.css";
 
 const dashboardActions = [
-  { href: "/asignar", title: "Asignar", description: "Registrar datos del vehículo", roles: [null, "employee", "admin"] },
-  { href: "/surtir", title: "Surtir", description: "Surtir estación y configurar esquema de distribución", roles: ["employee", "admin"] },
-  { href: "/tickets", title: "Tickets", description: "Consultar historial de reportes", roles: ["employee", "admin"] },
-  { href: "/usuarios", title: "Usuarios", description: "Manejo de usuarios", roles: ["admin"] },
+  { href: "/asignar", title: "Asignar", description: "Registrar datos del vehículo", roles: [null, "employee", "admin"], color: "#3b82f6" },
+  { href: "/surtir", title: "Surtir", description: "Surtir estación y configurar la distribución", roles: ["employee", "admin"], color: "#ef4444" },
+  { href: "/tickets", title: "Tickets", description: "Consultar historial de reportes", roles: ["employee", "admin"], color: "#84cc16" },
+  { href: "/usuarios", title: "Usuarios", description: "Manejo de usuarios", roles: ["admin"], color: "#f59e0b" },
 ];
 
 export default function renderDashboardPage(user, container, onLogout) {
@@ -12,11 +12,11 @@ export default function renderDashboardPage(user, container, onLogout) {
   const actions = dashboardActions
     .filter(({ roles }) => roles.includes(userLevel))
     .map(
-      ({ href, title, description }) => /*html*/ `
-        <a class="dashboard-action" href="${href}" data-link>
+      ({ href, title, description, color }) => /*html*/ `
+        <a class="dashboard-action" href="${href}" data-link style="background-color: ${color}; border-color: ${color};">
           <span class="dashboard-action-title">${title}</span>
           <span>${description}</span>
-          <span class="dashboard-action-arrow" aria-hidden="true">→</span>
+          <span class="dashboard-action-arrow" aria-hidden="true"><i class="fa-solid fa-right-to-bracket fa-lg" style="color: #fff"></i></span>
         </a>
       `
     )
@@ -25,8 +25,7 @@ export default function renderDashboardPage(user, container, onLogout) {
   container.innerHTML = /*html*/ `
     <main class="dashboard-page">
       <section class="dashboard-card">
-        <p class="dashboard-eyebrow">Sistema Orichuna</p>
-        <h1>Panel principal</h1>
+        <h1>Panel de control</h1>
         <nav class="dashboard-actions" aria-label="Opciones del sistema">${actions}</nav>
         <div class="dashboard-session">
           <span data-user-details></span>

@@ -1,15 +1,13 @@
 .operation-page {
   display: grid;
-  min-height: 100vh;
   place-items: center;
   padding: 2rem 1rem;
 }
 
 .operation-card {
-  width: min(100%, 720px);
+  max-width: 700px;
   padding: 2rem;
   background: #fff;
-  border: 1px solid #dededa;
   border-radius: 12px;
   box-shadow: 0 12px 35px rgb(0 0 0 / 7%);
 }
@@ -20,11 +18,25 @@
   text-align: center;
 }
 
-.operation-header { margin-bottom: 1.75rem; }
-.operation-header h1 { margin-bottom: 0.4rem; font-size: clamp(1.65rem, 5vw, 2rem); letter-spacing: -0.035em; }
+.operation-header {
+  margin-bottom: 1.75rem;
+}
+.operation-header h1 {
+  font-size: clamp(1.65rem, 5vw, 2rem);
+  letter-spacing: -0.035em;
+}
 .operation-header > p:last-child,
-.operation-card--message p { color: #676762; }
-.operation-eyebrow { margin-bottom: 0.45rem; color: #74736e; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.operation-card--message p {
+  color: #676762;
+}
+.operation-eyebrow {
+  margin-bottom: 0.45rem;
+  color: #74736e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 
 .vehicle-form {
   display: grid;
@@ -32,13 +44,17 @@
   gap: 1rem;
 }
 
-.form-field { display: grid; gap: 0.4rem; }
-.form-field label { color: #3f3f3c; font-size: 0.825rem; font-weight: 650; }
 .vehicle-form .form-field:first-child,
 .vehicle-form .status-box,
-.vehicle-form > .button { grid-column: 1 / -1; }
+.vehicle-form > .button {
+  grid-column: 1 / -1;
+}
 
 @media (max-width: 560px) {
-  .operation-card { padding: 1.25rem; }
-  .vehicle-form { grid-template-columns: 1fr; }
+  .operation-card {
+    padding: 1.25rem;
+  }
+  .vehicle-form {
+    grid-template-columns: 1fr;
+  }
 }

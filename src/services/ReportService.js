@@ -14,8 +14,6 @@ export default class ReportService extends Service {
   }
 
   async generateTicketReport(ticket) {
-    this.#validateTicket(ticket);
-
     const accepted = ticket.status.success;
     const document = new Document({
       styles: {
@@ -75,19 +73,14 @@ export default class ReportService extends Service {
             }),
             this.#heading("Datos del vehículo"),
             this.#field("Placa", ticket.vehicle.plateNumber),
-            this.#field("Color", ticket.vehicle.colour),
-            this.#field("Modelo", ticket.vehicle.model),
-            this.#heading("Estatus"),
             new Paragraph({
               children: [
-                new TextRun({
-                  text: accepted ? "ACEPTADO" : "CANCELADO",
-                  bold: true,
-                  color: accepted ? "247A3D" : "A12A21",
-                  size: 26,
-                }),
+                new TextRun({ text: "Color:", bold: true }),
+                new TextRun({text: " ⬤", color: ticket.vehicle.colour}),
               ],
             }),
+            this.#field("Modelo", ticket.vehicle.model),
+            this.#field("Estatus", accepted ? " ACEPTADO" : " CANCELADO", accepted ? "247A3D" : "A12A21"),
             ...(accepted
               ? [
                   this.#field("Tipo de vehículo", ticket.vehicle.type),
@@ -102,18 +95,7 @@ export default class ReportService extends Service {
                     ticket.status?.message
                   ),
                 ]),
-            this.#heading("Código de verificación"),
-            new Paragraph({
-              alignment: AlignmentType.CENTER,
-              children: [
-                new TextRun({
-                  text: String(ticket.verificationCode),
-                  bold: true,
-                  size: 44,
-                  characterSpacing: 120,
-                }),
-              ],
-            }),
+            this.#field("Código de verificación", String(ticket.verificationCode)),
           ],
         },
       ],
@@ -125,15 +107,15 @@ export default class ReportService extends Service {
   #heading(text) {
     return new Paragraph({
       spacing: { before: 240, after: 120 },
-      children: [new TextRun({ text, bold: true, size: 26 })],
+      children: [new TextRun({ text, bold: true, size: 30 })],
     });
   }
 
-  #field(label, value) {
+  #field(label, value, color = "202020") {
     return new Paragraph({
       children: [
         new TextRun({ text: `${label}: `, bold: true }),
-        new TextRun(String(value ?? "No especificado")),
+        new TextRun({text: value, color: color}),
       ],
     });
   }
@@ -146,27 +128,5 @@ export default class ReportService extends Service {
     }
 
     return new Intl.DateTimeFormat("es-VE", { dateStyle: "long" }).format(date);
-  }
-  
-  #validateTicket(ticket) {
-    if (!ticket || typeof ticket !== "object") {
-      throw new TypeError(
-        "Se requiere un ticket válido para generar el reporte."
-      );
-    }
-
-    if (!ticket.vehicle || typeof ticket.vehicle !== "object") {
-      throw new TypeError("El ticket debe incluir los datos del vehículo.");
-    }
-
-    if (!Number.isInteger(ticket.id) || ticket.id < 1 || ticket.id > 20) {
-      throw new TypeError("El número de turno debe estar entre 1 y 20.");
-    }
-
-    if (!/^\d{3}$/.test(String(ticket.verificationCode))) {
-      throw new TypeError(
-        "El código de verificación debe tener tres dígitos."
-      );
-    }
   }
 }

@@ -9,7 +9,6 @@
   width: min(100%, 430px);
   padding: 1.75rem;
   background: #fff;
-  border: 1px solid #dededa;
   border-radius: 12px;
   box-shadow: 0 12px 35px rgb(0 0 0 / 7%);
 }
@@ -20,10 +19,6 @@
   margin-bottom: 2rem;
 }
 
-.login-header {
-  margin-bottom: 1.75rem;
-}
-
 .login-header h1 {
   margin-bottom: 0.4rem;
   font-size: clamp(1.5rem, 5vw, 2rem);
@@ -31,7 +26,7 @@
   line-height: 1.1;
 }
 
-.login-header > p:last-child {
+.login-header + p {
   color: #676762;
   font-size: 0.925rem;
 }
@@ -44,12 +39,17 @@
 .form-field {
   display: grid;
   gap: 0.4rem;
-}
-
-.form-field label {
-  color: #3f3f3c;
+  position: relative;
   font-size: 0.825rem;
   font-weight: 650;
+  color: var(--gray-500);
+}
+
+.form-field svg {
+  position: absolute;
+  top: 2.5rem;
+  right: 0.5rem;
+  color: var(--gray-500);
 }
 
 .login-status {
@@ -87,26 +87,19 @@
 .cedula-input {
   display: flex;
   overflow: hidden;
-  background: #fff;
-  border: 1px solid #cececa;
   border-radius: 8px;
-  box-shadow: inset 0 1px 1px rgb(0 0 0 / 4%);
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  padding: 5px;
+  background: var(--gray-200)
 }
 
 .cedula-input:hover {
   border-color: #aaa9a4;
 }
 
-.cedula-input:focus-within {
-  border-color: #242422;
-  box-shadow: 0 0 0 3px rgb(36 36 34 / 12%);
-}
-
 .cedula-input select,
 .cedula-input input {
   border: 0;
-  border-radius: 0;
+  border-radius: 4px;
   box-shadow: none;
   outline: none;
 }
@@ -122,8 +115,7 @@
 .cedula-input select {
   flex: 0 0 6ch;
   padding: 0 0.65rem;
-  background: transparent;
-  border-right: 1px solid #dededa;
+  background: var(--gray-300);
   color: #4d4d49;
   cursor: pointer;
 }

@@ -55,7 +55,6 @@ function renderUserForm(user, container, onSubmit, onSendOTP) {
   container.innerHTML = /*html*/ `
     <section class="user-editor-card" aria-labelledby="user-form-title">
       <header>
-        <p class="users-eyebrow">${editing ? "Editar cuenta" : "Nueva cuenta"}</p>
         <h2 id="user-form-title">${editing ? "Modificar usuario" : "Registrar usuario"}</h2>
       </header>
 
@@ -69,11 +68,13 @@ function renderUserForm(user, container, onSubmit, onSendOTP) {
             </select>
             <input id="user-id-number" name="idNumber" type="number" inputmode="numeric" autocomplete="username" aria-labelledby="user-id-label" min="1" max="100000000" step="1" value="${escapeHTML(cedula.number)}" placeholder="12345678" ${editing ? "disabled" : ""} required>
           </div>
+          <i class="fa-solid fa-person fa-lg" style="top: 2.8rem; right: 0.35rem;"></i>
         </div>
 
         <div class="form-field">
           <label for="user-email">Correo electrónico</label>
           <input id="user-email" name="email" type="email" autocomplete="email" value="${escapeHTML(user?.email)}" placeholder="tu@correo.electronico" maxlength="40" required>
+          <i class="fa-solid fa-envelope"></i>
         </div>
 
         ${
@@ -94,6 +95,7 @@ function renderUserForm(user, container, onSubmit, onSendOTP) {
           <label for="user-password">Contraseña</label>
           <input id="user-password" name="password" type="password" autocomplete="new-password" placeholder="●●●●●●●●" maxlength="20" ${editing ? "" : "required"}>
           ${editing ? '<small>Déjala vacía para conservar la contraseña actual.</small>' : ""}
+          <i class="fa-solid fa-lock"></i>
         </div>
 
         <div class="form-field">
@@ -106,9 +108,9 @@ function renderUserForm(user, container, onSubmit, onSendOTP) {
 
         ${renderStatusBox()}
 
-        <div class="user-form-actions">
-          <button class="button button--primary" type="submit">${editing ? "Guardar cambios" : "Registrar usuario"}</button>
+        <div class="user-form-actions justify-left">          
           <button class="button" type="button" data-cancel-editor>Cancelar</button>
+          <button class="button button--primary" type="submit">${editing ? "Guardar cambios" : "Registrar usuario"}</button>
         </div>
       </form>
     </section>
@@ -178,8 +180,8 @@ function renderUsers(users, container, currentUserId) {
                   <td>${escapeHTML(user.email)}</td>
                   <td>${escapeHTML(roleLabels[user.role] ?? user.role)}</td>
                   <td class="users-actions">
-                    <button class="button" type="button" data-edit-user="${escapeHTML(user.id)}">Editar</button>
-                    <button class="button" type="button" data-delete-user="${escapeHTML(user.id)}" ${isCurrent ? 'disabled title="No puedes eliminar tu propia cuenta"' : ""}>Eliminar</button>
+                    <button class="button" type="button" data-edit-user="${escapeHTML(user.id)}"><i class="fa-solid fa-pencil"></i></button>
+                    <button class="button" type="button" data-delete-user="${escapeHTML(user.id)}" ${isCurrent ? 'disabled title="No puedes eliminar tu propia cuenta"' : ""} style="color: var(--red);"><i class="fa-solid fa-trash-can"></i></button>
                   </td>
                 </tr>
               `;
@@ -195,19 +197,15 @@ export default function renderUsersPage(authService, emailService, container) {
   container.innerHTML = /*html*/ `
     <main class="users-page">
       <section class="users-card" aria-labelledby="users-title">
-        <header class="users-header">
-          <div>
-            <p class="users-eyebrow">Administración</p>
-            <h1 id="users-title">Usuarios</h1>
-            <p>Registra y administra las cuentas con acceso al sistema.</p>
-          </div>
-          <div class="users-header-actions">
-            <a class="button" href="/dashboard" data-link>Volver al panel</a>
-            <button class="button button--primary" type="button" data-register-user>Registrar usuario</button>
-          </div>
+        <header>
+          <a class="button button--icon" href="/dashboard" aria-label="Volver al panel" data-link><i class="fa-solid fa-angle-left"></i></a>
+          <h1 id="users-title">Usuarios</h1>
         </header>
-        ${renderStatusBox()}
         <section data-users-list></section>
+        ${renderStatusBox()}
+        <div class="justify-left">          
+          <button class="button button--primary" type="button" data-register-user>Registrar usuario <i class="fa-solid fa-plus"></i></button>
+        </div>
         <section class="user-editor" data-user-editor></section>
       </section>
     </main>

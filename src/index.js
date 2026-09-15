@@ -70,7 +70,12 @@ const router = new Router(
       checkRoles([null, "employee", "admin"])
     ),
     "/surtir": new RouteConfig(
-      () => renderSupplyPage(inventoryServiceWrapper, rootContainer),
+      () =>
+        renderSupplyPage(
+          inventoryServiceWrapper,
+          ticketServiceWrapper,
+          rootContainer
+        ),
       checkRoles(["employee", "admin"])
     ),
     "/tickets": new RouteConfig(
@@ -93,3 +98,9 @@ const router = new Router(
 );
 
 router.init();
+
+const observer = new MutationObserver(() => FontAwesome.dom.i2svg());
+observer.observe(rootContainer, {
+  childList: true,
+  subtree: true,
+});

@@ -1,3 +1,4 @@
+import ReturnButton from "../components/ReturnButton";
 import { bindStatusBox, renderStatusBox } from "../components/StatusBox";
 import "../styles/TicketsTablePage.css";
 
@@ -50,7 +51,7 @@ function renderTable(tickets, container, assignedTotal) {
           </tr>
         </thead>
         <tbody data-ticket-rows></tbody>
-        <tfoot><tr><th colspan="11">Total de combustible asignado</th><td>${escapeHTML(assignedTotal)} lt</td><td colspan="2"></td></tr></tfoot>
+        <tfoot><tr><th colspan="12"><span>Total de combustible asignado: <span>${escapeHTML(assignedTotal)} lt</span></span></th></tfoot>
       </table>
     </div>
   `;
@@ -58,7 +59,7 @@ function renderTable(tickets, container, assignedTotal) {
   const rows = container.querySelector("[data-ticket-rows]");
   if (tickets.length === 0) {
     rows.innerHTML =
-      '<tr><td class="tickets-empty" colspan="13">No se encontraron tickets con estos filtros.</td></tr>';
+      '<tr><td colspan="13"><span class="tickets-empty">No se encontraron tickets con estos filtros.</span></td></tr>';
     return;
   }
   tickets.forEach((ticket) => renderTicketRow(ticket, rows));
@@ -87,20 +88,16 @@ export default function renderTicketsTablePage(
   container.innerHTML = /*html*/ `
     <main class="tickets-table-page">
       <section class="tickets-card" aria-labelledby="tickets-title">
-        <header class="tickets-header">
-          <div>
-            <p class="tickets-eyebrow">Historial</p>
-            <h1 id="tickets-title">Tickets</h1>
-            <p>Consulta los reportes emitidos por la estación.</p>
-          </div>
-          <a class="button" href="/dashboard" data-link>Volver al panel</a>
+        <header>
+          ${ReturnButton()}
+          <h1 id="tickets-title">Tickets</h1>
         </header>
 
         <form class="ticket-filters" data-filters>
-          <div class="form-field"><label for="filter-code">Código de verificación</label><input id="filter-code" name="verificationCode" type="text" inputmode="numeric" pattern="[0-9]{3}" maxlength="3"></div>
-          <div class="form-field"><label for="filter-plate">Placa</label><input id="filter-plate" name="plateNumber" type="text"></div>
-          <div class="form-field"><label for="filter-model">Modelo</label><input id="filter-model" name="model" type="text"></div>
-          <div class="form-field"><label for="filter-brand">Marca</label><input id="filter-brand" name="brand" type="text"></div>
+          <div class="form-field"><label for="filter-code">Código de verificación</label><input id="filter-code" name="verificationCode" type="text" inputmode="numeric" placeholder="000"></div>
+          <div class="form-field"><label for="filter-plate">Placa</label><input id="filter-plate" name="plateNumber" type="text" placeholder="AB123CD"></div>
+          <div class="form-field"><label for="filter-model">Modelo</label><input id="filter-model" name="model" type="text" placeholder="RAV4"></div>
+          <div class="form-field"><label for="filter-brand">Marca</label><input id="filter-brand" name="brand" type="text" placeholder="Toyota"></div>
           <div class="form-field">
             <label for="filter-type">Tipo de vehículo</label>
             <select id="filter-type" name="type"><option value="">Todos</option><option value="Car">Automóvil</option><option value="Motorbike">Motocicleta</option><option value="Truck">Camión</option></select>

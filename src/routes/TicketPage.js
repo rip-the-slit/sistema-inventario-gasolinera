@@ -7,8 +7,7 @@ export default async function renderTicketPage(ticketService, reportService, con
     <main class="ticket-page">
       <section class="ticket-card" aria-labelledby="ticket-title">
         <header class="operation-header">
-          <p class="operation-eyebrow">Comprobante</p>
-          <h1 id="ticket-title">Ticket de combustible</h1>
+          <h1 id="ticket-title">Comprobante digital</h1>
         </header>
         ${renderStatusBox()}
         <div class="ticket-preview" data-ticket-preview aria-busy="true"></div>

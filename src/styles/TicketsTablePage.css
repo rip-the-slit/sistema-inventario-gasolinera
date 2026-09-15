@@ -4,7 +4,7 @@
 }
 
 .tickets-card {
-  width: min(100%, 1500px);
+  width: 1000px;
   margin: 0 auto;
   padding: 2rem;
   background: #fff;
@@ -43,7 +43,6 @@
   gap: 1rem;
   margin-bottom: 1rem;
   padding: 1rem;
-  background: #fafaf8;
   border: 1px solid #e2e2de;
   border-radius: 10px;
 }
@@ -52,43 +51,43 @@
   display: flex;
   align-items: end;
   gap: 0.5rem;
+	grid-column-start: -2;
+  place-self: end;
 }
 
 .tickets-table-wrap {
-  overflow-x: auto;
-  margin-top: 1rem;
-  border: 1px solid #dededa;
-  border-radius: 10px;
+  max-height: 60vh;
 }
 
-.tickets-table {
-  width: 100%;
-  min-width: 1450px;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.tickets-table th,
-.tickets-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #e8e8e4;
-  font-size: 0.8rem;
-  vertical-align: top;
-}
-
-.tickets-table thead th {
-  position: sticky;
+thead th {
   top: 0;
-  color: #555550;
-  background: #f7f7f5;
+  position: sticky;
   white-space: nowrap;
+  z-index: 1;
 }
 
-.tickets-table tfoot th,
-.tickets-table tfoot td {
-  background: #f7f7f5;
+tfoot th,
+tfoot td {
+  background: var(--gray-100);
   border-bottom: 0;
   font-weight: 750;
+}
+
+.tickets-card tfoot > tr > th > span {
+  position: sticky;
+  left: 1rem;
+  font-size: 0.8rem;
+}
+
+.tickets-card tfoot > tr > th > span > span {
+  font-weight: semibold;
+  color: var(--gray-800);
+}
+
+.tickets-empty {
+  position: sticky;
+  color: var(--gray-600);
+  left: 1rem;
 }
 
 .ticket-state {
@@ -99,9 +98,8 @@
   font-weight: 750;
 }
 
-.ticket-state--accepted { color: #235f35; background: #e9f7ed; }
-.ticket-state--cancelled { color: #7b2921; background: #fff0ed; }
-.tickets-empty { padding: 2rem !important; color: #676762; text-align: center; }
+.ticket-state--accepted { color: var(--green); background: #e9f7ed; }
+.ticket-state--cancelled { color:var(--red); background: #fff0ed; }
 
 @media (max-width: 760px) {
   .tickets-card { padding: 1.25rem; }

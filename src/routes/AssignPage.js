@@ -3,14 +3,43 @@ import "../styles/AssignPage.css";
 
 const ASSIGNMENT_TIMEOUT_MS = 3 * 60 * 1000;
 
+function toMinutes(time) {
+  const match = /^(\d{2}):(\d{2})$/.exec(time ?? "");
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return null;
+  return hours * 60 + minutes;
+}
+
+export function isWithinSupplySchedule(schedule, now = new Date()) {
+  const start = toMinutes(schedule?.start);
+  const end = toMinutes(schedule?.end);
+  if (start === null || end === null || start === end) return false;
+
+  const current = now.getHours() * 60 + now.getMinutes();
+  return start < end
+    ? current >= start && current <= end
+    : current >= start || current <= end;
+}
+
 export default function renderAssignPage(ticketService, isSupplied, user, container, onTicket) {
-  if (!isSupplied) {
+  const supplySchedule = ticketService.getSupplySchedule();
+  const isWithinSchedule = isWithinSupplySchedule(supplySchedule);
+
+  if (!isSupplied || !isWithinSchedule) {
+    const unavailableMessage = !isSupplied
+      ? "La estación no dispone del nivel mínimo de combustible."
+      : "La estación se encuentra fuera del horario de suministro configurado.";
+
     container.innerHTML = /*html*/ `
       <main class="operation-page">
         <section class="operation-card operation-card--message">
           <h1>No es posible asignar en estos momentos</h1>
-          <p>La estación no dispone del nivel mínimo de combustible.</p>
-          ${user?.role === "admin" ? `<a class="button button--primary" href="/surtir" data-link>Surta la estación antes de asignar</a>` : ""}
+          <p>${unavailableMessage}</p>
+          ${user?.role === "admin" && !isSupplied ? `<a class="button button--primary" href="/surtir" data-link>Surta la estación antes de asignar</a>` : ""}
+          ${user?.role === "admin" && isSupplied && !isWithinSchedule ? `<a class="button button--primary" href="/surtir" data-link>Ajustar horario de suministro</a>` : ""}
           <a class="button" href="/dashboard" data-link>Volver al panel</a>
         </section>
       </main>
@@ -22,11 +51,11 @@ export default function renderAssignPage(ticketService, isSupplied, user, contai
     <main class="operation-page">
       <section class="operation-card" aria-labelledby="assign-title">
         <header class="operation-header">
-          <p class="operation-eyebrow">Asignación de combustible</p>
+          <a class="button button--icon" href="/dashboard" aria-label="Volver al panel" data-link><i class="fa-solid fa-angle-left"></i></a>
           <h1 id="assign-title">Registrar vehículo</h1>
-          <p>Complete la operación durante los próximos tres minutos.</p>
         </header>
 
+        <p>Complete la operación durante los próximos tres minutos.</p>
         <form class="vehicle-form" data-assign-form>
           <div class="form-field">
             <label for="vehicle-type">Tipo de vehículo</label>
@@ -36,12 +65,25 @@ export default function renderAssignPage(ticketService, isSupplied, user, contai
               <option value="truck">Camión</option>
             </select>
           </div>
-          <div class="form-field"><label for="vehicle-brand">Marca</label><input id="vehicle-brand" name="brand" type="text" required></div>
-          <div class="form-field"><label for="vehicle-model">Modelo</label><input id="vehicle-model" name="model" type="text" required></div>
-          <div class="form-field"><label for="vehicle-plate">Placa</label><input id="vehicle-plate" name="plateNumber" type="text" required></div>
-          <div class="form-field"><label for="vehicle-colour">Color</label><input id="vehicle-colour" name="colour" type="text" required></div>
+          <div class="form-field"><label for="vehicle-brand">Marca</label><input id="vehicle-brand" name="brand" type="text" placeholder="Toyota" minLength="2" maxLength="20" required></div>
+          <div class="form-field"><label for="vehicle-model">Modelo</label><input id="vehicle-model" name="model" type="text" placeholder="RAV4" minLength="2" maxLength="20" required></div>
+          <div class="form-field"><label for="vehicle-plate">Placa</label><input id="vehicle-plate" name="plateNumber" type="text" placeholder="AB123CD" pattern="^[A-Z]{2}[0-9]{3}[A-Z]{2}$" oninvalid="this.setCustomValidity('Tu placa debe tener el siguiente formato: {Let}{Let}{Num}{Num}{Num}{Let}{Let} en mayúsculas.')" oninput="this.setCustomValidity('')" required></div>
+          <div class="form-field">
+            <label for="vehicle-colour">Color</label>
+            <select id="vehicle-colour" name="colour" required>
+              <option value="000000">Negro</option>
+              <option value="FFFFFF">Blanco</option>
+              <option value="FF0000">Rojo</option>
+              <option value="0000FF">Azul</option>
+              <option value="008000">Verde</option>
+              <option value="FFFF00">Amarillo</option>
+              <option value="FFA500">Naranja</option>
+              <option value="800080">Morado</option>
+              <option value="FFC0CB">Rosa</option>
+              <option value="808080">Gris</option>
+            </select>
+          </div>
           ${renderStatusBox()}
-          <a class="button" href="/dashboard" data-link>Volver al panel</a>
           <button class="button button--primary" type="submit">Generar ticket</button>
         </form>
       </section>
@@ -55,6 +97,11 @@ export default function renderAssignPage(ticketService, isSupplied, user, contai
 
   const submitTicket = (status) => {
     if (completed) return;
+
+    if (!isWithinSupplySchedule(ticketService.getSupplySchedule())) {
+      statusBox.show("La estación se encuentra fuera del horario de suministro configurado.");
+      return;
+    }
 
     try {
       const vehicleData = Object.fromEntries(new FormData(form));
