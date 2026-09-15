@@ -13,7 +13,7 @@ module.exports = {
         new HtmlWebpackPluging({
             template: "./src/template.html",
         }),
-        new Dotenv()
+        new Dotenv({ systemvars: true })
     ],
     module: {
         rules: [

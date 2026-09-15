@@ -11,7 +11,7 @@ export class Router {
     this.currentRoute = null;
     this.authService = authService;
 
-    window.addEventListener("popstate", () => this.handleRoute());
+    window.addEventListener("hashchange", () => this.handleRoute());
     document.addEventListener("click", (e) => {
       const closestLink = e.target.closest("a[data-link]")
       if (closestLink) {
@@ -22,12 +22,19 @@ export class Router {
   }
 
   navigate(path) {
-    history.pushState({}, "", path);
-    this.handleRoute();
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+    if (window.location.hash === `#${normalizedPath}`) {
+      this.handleRoute();
+      return;
+    }
+
+    window.location.hash = normalizedPath;
   }
 
   handleRoute() {
-    const url = new URL(window.location.href);
+    const hashPath = window.location.hash.slice(1) || "/";
+    const url = new URL(hashPath, window.location.origin);
     const path = url.pathname || "/";
     const params = Object.fromEntries(url.searchParams.entries());
     const route = this.routes[path] || this.routes["/404"];
