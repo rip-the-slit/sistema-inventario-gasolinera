@@ -119,6 +119,4 @@ tr:last-child td { border-bottom: 0; }
 
 @media (max-width: 700px) {
   .users-card { padding: 1.25rem; }
-  .users-header { align-items: stretch; flex-direction: column; }
-  .users-header-actions { flex-wrap: wrap; }
 }

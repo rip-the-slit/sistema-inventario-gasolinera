@@ -17,6 +17,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
     env:
       EMAILJS_PUBLIC_KEY: ${{ vars.EMAILJS_PUBLIC_KEY }}
       EMAILJS_SERVICEID: ${{ vars.EMAILJS_SERVICEID }}
@@ -28,6 +30,10 @@ jobs:
           cache: npm
       - uses: actions/configure-pages@v5
       - run: npm ci
+      - name: Verify build variables
+        run: |
+          test -n "$EMAILJS_PUBLIC_KEY"
+          test -n "$EMAILJS_SERVICEID"
       - run: npm run build
       - uses: actions/upload-pages-artifact@v4
         with:
