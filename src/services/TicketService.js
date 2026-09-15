@@ -94,7 +94,7 @@ export default class TicketService extends Service {
     try {
       this.supplySchedule = this.#validateSupplySchedule(savedSchedule);
     } catch {
-      this.supplySchedule = { start: null, end: null };
+      this.supplySchedule = { start: "06:00", end: "18:00" };
     }
 
     this.#saveTickets();
@@ -134,6 +134,7 @@ export default class TicketService extends Service {
       const accepted = status === undefined || status?.success !== false;
 
       if (accepted) {
+        this.checkPlateNumber(vehicle.plateNumber, emissionDate);
         const quantity = vehicle.assignFuel(this.inventoryService);
         status = { success: true, type: vehicle.type, quantity };
       }
@@ -219,6 +220,19 @@ export default class TicketService extends Service {
     return codesLeft[randomIndex];
   }
 
+  checkPlateNumber(plateNumber, emissionDate) {
+    if (
+      this.getTickets({ plateNumber, emissionDate, status: { success: true } })
+        .length
+    ) {
+      throw new Error(
+        "Ya se le fué asignado combustible a este número de placa."
+      );
+    }
+
+    return true;
+  }
+
   getSupplySchedule() {
     return { ...this.supplySchedule };
   }
@@ -241,6 +255,16 @@ export default class TicketService extends Service {
     }
 
     const { start, end } = supplySchedule;
+    if (
+      !/^\d{2}:\d{2}$/.test(start) ||
+      !/^\d{2}:\d{2}$/.test(end) ||
+      start === end
+    ) {
+      throw new TypeError(
+        "El horario debe tener una hora de inicio y fin diferentes."
+      );
+    }
+
     return { start, end };
   }
 
@@ -261,7 +285,8 @@ export default class TicketService extends Service {
       return null;
     }
 
-    const VehicleClass = vehicleClasses[String(ticket.vehicle.type).toLowerCase()];
+    const VehicleClass =
+      vehicleClasses[String(ticket.vehicle.type).toLowerCase()];
     if (!VehicleClass) return null;
 
     const id = Number(ticket.id);
