@@ -24,8 +24,8 @@ export function isWithinSupplySchedule(schedule, now = new Date()) {
     : current >= start || current <= end;
 }
 
-export default function renderAssignPage(ticketService, isSupplied, user, container, onTicket) {
-  const supplySchedule = ticketService.getSupplySchedule();
+export default async function renderAssignPage(ticketService, isSupplied, user, container, onTicket) {
+  const supplySchedule = await ticketService.getSupplySchedule();
   const isWithinSchedule = isWithinSupplySchedule(supplySchedule);
 
   if (!isSupplied || !isWithinSchedule) {
@@ -93,19 +93,21 @@ export default function renderAssignPage(ticketService, isSupplied, user, contai
   const form = container.querySelector("[data-assign-form]");
   const statusBox = bindStatusBox(container);
   let completed = false;
+  let pending = false;
   let timeoutId;
 
-  const submitTicket = (status) => {
-    if (completed) return;
-
-    if (!isWithinSupplySchedule(ticketService.getSupplySchedule())) {
-      statusBox.show("La estación se encuentra fuera del horario de suministro configurado.");
-      return;
-    }
+  const submitTicket = async (status) => {
+    if (completed || pending) return;
+    pending = true;
 
     try {
+      if (!isWithinSupplySchedule(await ticketService.getSupplySchedule())) {
+        statusBox.show("La estación se encuentra fuera del horario de suministro configurado.");
+        return;
+      }
+
       const vehicleData = Object.fromEntries(new FormData(form));
-      const ticket = ticketService.generateTicket({ ...vehicleData, status });
+      const ticket = await ticketService.generateTicket({ ...vehicleData, status });
       if (!ticket?.verificationCode) throw new Error("No fue posible generar el ticket.");
 
       completed = true;
@@ -113,6 +115,8 @@ export default function renderAssignPage(ticketService, isSupplied, user, contai
       onTicket(ticket.verificationCode);
     } catch (error) {
       statusBox.show(error.message);
+    } finally {
+      pending = false;
     }
   };
 

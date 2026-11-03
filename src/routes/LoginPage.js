@@ -54,7 +54,7 @@ export default function renderLoginPage(authService, container, onLogin) {
   const form = container.querySelector("[data-login-form]");
   const statusBox = bindStatusBox(container);
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const credentials = Object.fromEntries(new FormData(form));
@@ -63,7 +63,7 @@ export default function renderLoginPage(authService, container, onLogin) {
     delete credentials.idNumber;
 
     try {
-      const user = authService.login(credentials);
+      const user = await authService.login(credentials);
       onLogin(user);
     } catch (error) {
       statusBox.show(error.message);

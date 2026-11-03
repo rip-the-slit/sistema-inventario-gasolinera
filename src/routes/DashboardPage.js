@@ -39,8 +39,12 @@ export default function renderDashboardPage(user, container, onLogout) {
     ? `Sesión iniciada como ${user.email} (${user.role}).`
     : "Has continuado como cliente.";
 
-  container.querySelector("[data-logout]")?.addEventListener("click", () => {
-    globalThis.location.href = "/";
-    onLogout()
+  container.querySelector("[data-logout]")?.addEventListener("click", async () => {
+    try {
+      await onLogout();
+      globalThis.location.hash = "/";
+    } catch (error) {
+      container.querySelector("[data-user-details]").textContent = error.message;
+    }
   })
 }

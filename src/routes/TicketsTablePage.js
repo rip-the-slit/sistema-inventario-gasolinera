@@ -123,9 +123,9 @@ export default function renderTicketsTablePage(
   const tableSection = page.querySelector("[data-table]");
   const statusBox = bindStatusBox(page);
 
-  const renderTickets = () => {
+  const renderTickets = async () => {
     try {
-      const tickets = ticketService.getTickets(getFilters(filters));
+      const tickets = await ticketService.getTickets(getFilters(filters));
       const assignedTotal = tickets.reduce(
         (total, ticket) =>
           total +

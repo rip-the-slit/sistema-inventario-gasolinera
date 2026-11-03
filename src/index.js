@@ -34,25 +34,25 @@ const { state: emailServiceWrapper } = createProxy(emailService, authService);
 const router = new Router(
   {
     "/": new RouteConfig(
-      () =>
+      async () =>
         renderLoginPage(authServiceWrapper, rootContainer, () =>
           router.navigate("/dashboard")
         ),
       checkRoles([null, "employee", "admin"])
     ),
     "/dashboard": new RouteConfig(
-      () =>
-        renderDashboardPage(authService.getCurrentUser(), rootContainer, () =>
+      async () =>
+        renderDashboardPage(await authService.getCurrentUser(), rootContainer, () =>
           authService.logout()
         ),
       checkRoles([null, "employee", "admin"])
     ),
     "/asignar": new RouteConfig(
-      () =>
+      async () =>
         renderAssignPage(
           ticketServiceWrapper,
-          inventoryService.isSupplied(),
-          authService.getCurrentUser(),
+          await inventoryService.isSupplied(),
+          await authService.getCurrentUser(),
           rootContainer,
           (verificationCode) =>
             router.navigate(`/ticket?verificationCode=${verificationCode}`)
@@ -60,7 +60,7 @@ const router = new Router(
       checkRoles([null, "employee", "admin"])
     ),
     "/ticket": new RouteConfig(
-      ({ verificationCode }) =>
+      async ({ verificationCode }) =>
         renderTicketPage(
           ticketServiceWrapper,
           reportServiceWrapper,
@@ -70,7 +70,7 @@ const router = new Router(
       checkRoles([null, "employee", "admin"])
     ),
     "/surtir": new RouteConfig(
-      () =>
+      async () =>
         renderSupplyPage(
           inventoryServiceWrapper,
           ticketServiceWrapper,
@@ -79,7 +79,7 @@ const router = new Router(
       checkRoles(["employee", "admin"])
     ),
     "/tickets": new RouteConfig(
-      () =>
+      async () =>
         renderTicketsTablePage(
           ticketServiceWrapper,
           rootContainer,
@@ -89,7 +89,7 @@ const router = new Router(
       checkRoles(["employee", "admin"])
     ),
     "/usuarios": new RouteConfig(
-      () =>
+      async () =>
         renderUsersPage(authServiceWrapper, emailServiceWrapper, rootContainer),
       checkRoles(["admin"])
     ),

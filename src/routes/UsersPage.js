@@ -193,7 +193,7 @@ function renderUsers(users, container, currentUserId) {
   `;
 }
 
-export default function renderUsersPage(authService, emailService, container) {
+export default async function renderUsersPage(authService, emailService, container) {
   container.innerHTML = /*html*/ `
     <main class="users-page">
       <section class="users-card" aria-labelledby="users-title">
@@ -215,67 +215,71 @@ export default function renderUsersPage(authService, emailService, container) {
   const usersList = page.querySelector("[data-users-list]");
   const editor = page.querySelector("[data-user-editor]");
   const pageStatus = bindStatusBox(page);
-  const currentUser = authService.getCurrentUser();
+  const currentUser = await authService.getCurrentUser();
 
-  const refreshUsers = () =>
-    renderUsers(authService.getUsers(), usersList, currentUser?.id);
+  const refreshUsers = async () =>
+    renderUsers(await authService.getUsers(), usersList, currentUser?.id);
 
-  const finishAction = (message) => {
-    refreshUsers();
+  const finishAction = async (message) => {
+    await refreshUsers();
     editor.replaceChildren();
     pageStatus.show(message, "success");
   };
 
-  refreshUsers();
+  await refreshUsers();
 
-  page.addEventListener("click", (event) => {
+  page.addEventListener("click", async (event) => {
     const registerButton = event.target.closest("[data-register-user]");
     const editButton = event.target.closest("[data-edit-user]");
     const deleteButton = event.target.closest("[data-delete-user]");
 
-    if (registerButton) {
-      renderUserForm(
-        null,
-        editor,
-        (user) => {
-          authService.register(user);
-          finishAction("Usuario registrado correctamente.");
-        },
-        async (email) => {
-          const otp = authService.generateOTP(email);
-          await emailService.sendOTP(email, otp, "10 minutos");
+    try {
+      if (registerButton) {
+        renderUserForm(
+          null,
+          editor,
+          async (user) => {
+            await authService.register(user);
+            await finishAction("Usuario registrado correctamente.");
+          },
+          async (email) => {
+            const otp = await authService.generateOTP(email);
+            await emailService.sendOTP(email, otp, "10 minutos");
+          }
+        );
+        return;
+      }
+
+      if (editButton) {
+        const user = (await authService
+          .getUsers())
+          .find((candidate) => candidate.id === editButton.dataset.editUser);
+        if (!user) {
+          pageStatus.show("No se encontró el usuario seleccionado.");
+          return;
         }
-      );
-      return;
-    }
-
-    if (editButton) {
-      const user = authService
-        .getUsers()
-        .find((candidate) => candidate.id === editButton.dataset.editUser);
-      if (!user) {
-        pageStatus.show("No se encontró el usuario seleccionado.");
+        renderUserForm(user, editor, async (updatedUser) => {
+          await authService.editUser(updatedUser);
+          await finishAction("Usuario actualizado correctamente.");
+        });
         return;
       }
-      renderUserForm(user, editor, (updatedUser) => {
-        authService.editUser(updatedUser);
-        finishAction("Usuario actualizado correctamente.");
-      });
-      return;
-    }
 
-    if (deleteButton && !deleteButton.disabled) {
-      const user = authService
-        .getUsers()
-        .find((candidate) => candidate.id === deleteButton.dataset.deleteUser);
-      if (!user) {
-        pageStatus.show("No se encontró el usuario seleccionado.");
-        return;
+      if (deleteButton && !deleteButton.disabled) {
+        const user = (await authService
+          .getUsers())
+          .find((candidate) => candidate.id === deleteButton.dataset.deleteUser);
+        if (!user) {
+          pageStatus.show("No se encontró el usuario seleccionado.");
+          return;
+        }
+        renderDeleteConfirmation(user, editor, async (id) => {
+          await authService.deleteUser(id);
+          await finishAction("Usuario eliminado correctamente.");
+        });
       }
-      renderDeleteConfirmation(user, editor, (id) => {
-        authService.deleteUser(id);
-        finishAction("Usuario eliminado correctamente.");
-      });
+    } catch (error) {
+      pageStatus.show(error.message);
     }
   });
 }

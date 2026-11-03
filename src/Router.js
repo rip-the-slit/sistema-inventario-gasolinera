@@ -32,24 +32,29 @@ export class Router {
     window.location.hash = normalizedPath;
   }
 
-  handleRoute() {
+  async handleRoute() {
     const hashPath = window.location.hash.slice(1) || "/";
     const url = new URL(hashPath, window.location.origin);
     const path = url.pathname || "/";
     const params = Object.fromEntries(url.searchParams.entries());
     const route = this.routes[path] || this.routes["/404"];
-    const userRole = this.authService.getCurrentUser()?.role ?? null;
+    try {
+      const userRole = (await this.authService.getCurrentUser())?.role ?? null;
 
-    if (route) {
-      if (route.allowRoute(userRole)) {
-        route.handler(params);
+      if (route) {
+        if (route.allowRoute(userRole)) {
+          await route.handler(params);
+        } else {
+          const fallbackPath = userRole === null ? "/" : "/dashboard";
+          if (path !== fallbackPath) this.navigate(fallbackPath);
+        }
+        this.currentRoute = path;
       } else {
-        const fallbackPath = userRole === null ? "/" : "/dashboard";
-        if (path !== fallbackPath) this.navigate(fallbackPath);
+        console.error("Ruta no encontrada:", path);
       }
-      this.currentRoute = path;
-    } else {
-      console.error("Ruta no encontrada:", path);
+    } catch (error) {
+      const app = document.getElementById("app");
+      app.textContent = error.message;
     }
   }
 

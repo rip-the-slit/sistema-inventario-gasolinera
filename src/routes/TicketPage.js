@@ -26,7 +26,7 @@ export default async function renderTicketPage(ticketService, reportService, con
   try {
     if (!verificationCode) throw new Error("No se proporcionó un código de verificación.");
 
-    const [ticket] = ticketService.getTickets({ verificationCode });
+    const [ticket] = await ticketService.getTickets({ verificationCode });
     if (!ticket) throw new Error("No se encontró un ticket con ese código.");
 
     const blob = await reportService.generateTicketReport(ticket);

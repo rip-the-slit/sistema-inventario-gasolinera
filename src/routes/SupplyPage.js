@@ -9,15 +9,15 @@ const vehicleLabels = {
   truck: "Camión",
 };
 
-export default function renderSupplyPage(
+export default async function renderSupplyPage(
   inventoryService,
   ticketService,
   container
 ) {
-  const tank = inventoryService.getTank();
-  const currentQuantity = tank.getQuantity();
-  const assignedValues = inventoryService.getAssignedLtPerVehicle();
-  const supplySchedule = ticketService.getSupplySchedule();
+  const tank = await inventoryService.getTank();
+  const currentQuantity = await tank.getQuantity();
+  const assignedValues = await inventoryService.getAssignedLtPerVehicle();
+  const supplySchedule = await ticketService.getSupplySchedule();
   const distributionFields = Object.entries(assignedValues)
     .map(
       ([type, value]) => /*html*/ `
@@ -87,7 +87,7 @@ export default function renderSupplyPage(
     animationData: Waves,
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     try {
@@ -98,9 +98,9 @@ export default function renderSupplyPage(
         truck: Number(values.truck),
       };
 
-      inventoryService.setAssignedLtPerVehicle(assignedLtPerVehicleType);
-      tank.supply(Number(values.tankQuantity));
-      ticketService.setSupplySchedule({
+      await inventoryService.setAssignedLtPerVehicle(assignedLtPerVehicleType);
+      await tank.supply(Number(values.tankQuantity));
+      await ticketService.setSupplySchedule({
         start: values.supplyStart,
         end: values.supplyEnd,
       });

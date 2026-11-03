@@ -2,45 +2,33 @@ export default class Service {
   #permissions;
 
   constructor(permissions = {}) {
-    this.#permissions = Object.fromEntries(
-      Object.entries(permissions).map(([action, roles]) => [
-        action,
-        Array.isArray(roles) ? [...roles] : [],
-      ])
-    );
+    this.#permissions = permissions;
   }
 
   getPermissions() {
-    return Object.fromEntries(
-      Object.entries(this.#permissions).map(([action, roles]) => [
-        action,
-        [...roles],
-      ])
-    );
+    return Object.fromEntries(Object.entries(this.#permissions).map(([action, roles]) => [action, [...roles]]));
   }
 
-  readStorage(key, fallback = null) {
-    try {
-      const value = globalThis.sessionStorage?.getItem(key);
-      return value === null || value === undefined ? fallback : JSON.parse(value);
-    } catch {
-      return fallback;
+  async request(endpoint, action, data = {}, method = "GET") {
+    const url = new URL(`api/${endpoint}.php`, document.baseURI);
+    url.searchParams.set("action", action);
+    const options = { method, credentials: "same-origin" };
+    if (method === "GET") {
+      for (const [key, value] of Object.entries(data)) {
+        url.searchParams.set(key, typeof value === "object" ? JSON.stringify(value) : value);
+      }
+    } else {
+      options.headers = { "Content-Type": "application/json" };
+      options.body = JSON.stringify(data);
     }
-  }
-
-  writeStorage(key, value) {
+    const response = await fetch(url, options);
+    let result;
     try {
-      globalThis.sessionStorage?.setItem(key, JSON.stringify(value));
+      result = await response.json();
     } catch {
-      // La aplicación sigue siendo utilizable si el almacenamiento no está disponible.
+      throw new Error("El servidor no devolvió una respuesta válida.");
     }
-  }
-
-  removeStorage(key) {
-    try {
-      globalThis.sessionStorage?.removeItem(key);
-    } catch {
-      // La aplicación sigue siendo utilizable si el almacenamiento no está disponible.
-    }
+    if (!response.ok) throw new Error(result.error || "No fue posible completar la operación.");
+    return result.data;
   }
 }
